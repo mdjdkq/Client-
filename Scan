@@ -1,0 +1,29 @@
+-- SCRIPT QUÉT HỆ THỐNG WANTED CỦA EMERGENCY HAMBURG
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local found = false
+
+print("--- BẮT ĐẦU QUÉT HỆ THỐNG WANTED ---")
+
+-- Hàm tìm kiếm từ khóa
+local function scan(root, description)
+    for _, obj in pairs(root:GetDescendants()) do
+        local name = string.lower(obj.Name)
+        if string.find(name, "wanted") or string.find(name, "bounty") or string.find(name, "criminal") or string.find(name, "suspect") then
+            print(description .. " phát hiện đối tượng nghi vấn: " .. obj:GetFullName() .. " (Loại: " .. obj.ClassName .. ")")
+            found = true
+        end
+    end
+end
+
+-- Quét các khu vực lưu trữ chung của Game
+scan(ReplicatedStorage, "[ReplicatedStorage]")
+if game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") then
+    scan(game:GetService("Players").LocalPlayer.PlayerGui, "[PlayerGui/Phone]")
+end
+
+if not found then
+    print("Chưa tìm thấy folder trực diện, hãy đảm bảo bạn ĐANG BẬT ĐIỆN THOẠI và bấm vào mục Police trong game khi chạy script này!")
+else
+    print("--- QUÉT HOÀN TẤT! Hãy mở F9 (Console) lên và chụp hoặc chép lại các dòng kết quả gửi cho tôi ---")
+end
+
