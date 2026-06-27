@@ -1,0 +1,54 @@
+pcall(function()
+    -- SERVICES KHỞI TẠO
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local StarterGui = game:GetService("StarterGui")
+
+    -- Hàm gửi thông báo nhanh lên góc màn hình hệ thống Roblox
+    local function Notify(title, text)
+        StarterGui:SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = 5
+        })
+    end
+
+    Notify("HỆ THỐNG SCAN", "Đang tiến hành quét ngầm bộ nhớ...")
+
+    -- 1. BẮT ĐẦU DÒ TÌM ĐƯỜNG DẪN DANH SÁCH TRUY NÃ (WANTED LIST)
+    local WantedFolder = nil
+
+    -- Quét trong ReplicatedStorage (Nơi chứa các sự kiện và dữ liệu truyền tải của điện thoại)
+    for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
+        local name = string.lower(obj.Name)
+        if string.find(name, "wanted") or string.find(name, "bounty") or string.find(name, "police") then
+            if obj:IsA("Folder") or obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                WantedFolder = obj
+                Notify("PHÁT HIỆN", "Tìm thấy nguồn dữ liệu: " .. obj.Name)
+                break
+            end
+        end
+    end
+
+    -- Nếu không tìm thấy trong ReplicatedStorage, quét giao diện điện thoại trong PlayerGui
+    if not WantedFolder then
+        for _, obj in pairs(LocalPlayer:WaitForChild("PlayerGui"):GetDescendants()) do
+            if string.find(string.lower(obj.Name), "wanted") or string.find(string.lower(obj.Name), "list") then
+                WantedFolder = obj
+                Notify("PHÁT HIỆN UI", "Tìm thấy danh sách trong máy: " .. obj.Name)
+                break
+            end
+        end
+    end
+
+    -- 2. KẾT QUẢ QUÉT
+    if WantedFolder then
+        Notify("THÀNH CÔNG", "Đã kết nối tới danh sách Cảnh Sát!")
+        -- In thông tin chi tiết vào bộ nhớ để chuẩn bị tích hợp sang bản Client chính
+        shared.EmergencyHamburgWantedSource = WantedFolder
+    else
+        Notify("THẤT BẠI", "Vẫn chưa dò được thư mục. Bạn đã bấm mở mục Police trong điện thoại chưa?")
+    end
+end)
+
